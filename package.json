@@ -1,0 +1,25 @@
+{
+  "name": "firstapp",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "body-parser": "~1.18.2",
+    "body-parser-xml": "^1.1.0",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "express": "~4.15.5",
+    "express-session": "^1.15.6",
+    "jade": "~1.11.0",
+    "lodash": "^4.17.5",
+    "md5": "^2.2.1",
+    "mkdirp": "^0.5.1",
+    "moment": "^2.21.0",
+    "mongodb": "^3.0.3",
+    "morgan": "~1.9.0",
+    "serve-favicon": "~2.4.5"
+  }
+}
