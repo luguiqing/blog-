@@ -21,6 +21,7 @@ module.exports = new class extends Model {
 				type  		: 		Number,
 				required 	: 		true
 			},
+			userName 		: 		String,
 			status 		: 		{
 				type  		: 		Number,
 				required 	: 		true,

@@ -29,17 +29,16 @@ module.exports = new class extends Controller{
 			})
 
 		}).then( result => {
-			console.log(result);
 			return userModel.select({
 				where   : 	{
 					_id :   result
 				},
-				field 	: 	["userName", "auth", "avatar", "des"]
+				field 	: 	["userName", "auth", "avatar", "des", "_id"]
 			})
 		}).then( result => {
-			//后面补充token
+			//token在中间层补充
 			return{
-				data :   result,
+				data :   result[0],
 				str  :   "注册成功"
 			}
 		})
@@ -50,11 +49,12 @@ module.exports = new class extends Controller{
 
 		return userModel.select({
 			where 	   		: 	{
-				userName 	: 	req.body.userName
+				userName 	: 	req.body.userName,
+				status 		: 	'1'
 			}
 		}).then( result => {
 			if(result.length === 0){
-				this.paramError("用户名不存在")
+				this.paramError("用户不存在或者被冻结")
 			}
 			result = result[0];
 			let temp = md5(result.salt + req.body.password + new Date(result.createDate).getTime());
@@ -62,9 +62,6 @@ module.exports = new class extends Controller{
 			if(temp !== result.password){
 				this.paramError("密码错误")
 			}
-			//后面补充token
-			//req.session.token = Math.random().toString(36).substring(3, 8);
-			//console.log('login' + req.session.token)
 			return{
 				data :   result,
 				str  :   "登录成功"

@@ -16,7 +16,7 @@ module.exports = new class extends Model {
 			status 		: 		{
 				type  		: 		String,
 				required 	: 		true,
-				default  	: 		1
+				default  	: 		'1'
 			},
 			auth 		: 		{
 				type  		: 		Number,
