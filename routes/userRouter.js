@@ -9,5 +9,11 @@ router.post('/register', (...args) => user.safeMode( 'register', ...args) );
 
 router.post('/editUserInfo', (...args) => user.safeMode( 'editUserInfo', ...args) );
 
+router.post('/changeUserStatus', (...args) => user.safeMode( 'changeUserStatus', ...args) );
+
+router.post('/getUserList', (...args) => user.safeMode( 'getUserList', ...args) );
+
+router.post('/forceDeleteUser', (...args) => user.safeMode( 'forceDeleteUser', ...args) );
+
 
 module.exports = router;

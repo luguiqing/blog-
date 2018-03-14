@@ -39,7 +39,6 @@ module.exports = new class extends Controller{
 						this.paramError('文章不存在')
 					}
 					let image = result[0]['image'];
-					console.log(message.image)
 					return articleModel.update({
 						where 		   : 		{
 							_id  : 	req.body.articleId
@@ -54,7 +53,6 @@ module.exports = new class extends Controller{
 							updateDate 	: 		Date.now()
 						}
 					}).then( result => {
-						console.log("in")
 						image.forEach( item => {
 							if(fs.existsSync('files/userId-' + req.body.userId + '/' + item)){
 								fs.unlinkSync('files/userId-' + req.body.userId + '/' + item);
@@ -133,6 +131,41 @@ module.exports = new class extends Controller{
 		})
 	}
 
+	//获取全部文章列表
+	getAllArticleList( req ){
+		this.validEmpty(["userId"], req.body);
+
+		return userModel.select({
+			where 	   : 		{
+				_id    : 	 req.body.userId,
+				status : 	 '1',
+				auth   :  	 2
+			}
+		}).then( result => {
+			if(result.length === 0){
+				this.paramError("没有权限");
+			}
+
+			return articleModel.select({
+				field 	: 	[ 0, 'image', "content"],
+				order  	: 	{
+					'_id' 	 : 		-1
+				}
+			})
+		}).then( result => {
+			//field不知为啥不起作用
+			result.forEach( item => {
+				if(item.content.length > 0){
+					delete item.content;
+				}
+			})
+			return{
+				data : result,
+				str  : "获取全部文章列表成功"
+			}
+		})
+	}
+
 	//分页获取热门文章
 	/*
 	* pageSize    一次加载条数
@@ -196,6 +229,127 @@ module.exports = new class extends Controller{
 			return{
 				data : result,
 				str  : "获取自己文章列表成功"
+			}
+		})
+	}
+
+	//管理员强制不让其上热门博客
+	changeArticleStatus( req ){
+		this.validEmpty(["userId", "articleId", "status"], req.body);
+
+		return userModel.select({
+			where 	   : 		{
+				_id    : 	 req.body.userId,
+				status : 	 '1',
+				auth   :  	 2
+			}
+		}).then( result => {
+			if(result.length === 0){
+				this.paramError("没有权限");
+			}
+
+			return articleModel.update({
+				where  		: 		{
+					_id 	: 		req.body.articleId
+				},
+				obj 		: 		{
+					status 	: 		req.body.status
+				}
+			})
+		}).then( result => {
+			return{
+				data : result,
+				str  : "更改文章status成功"
+			}
+		})
+	}
+
+	//管理员强制删除用户文章
+	forceDeleteArticle( req ){
+		this.validEmpty(["userId", "articleId"], req.body);
+		let article;
+		return userModel.select({
+			where 	   : 		{
+				_id    : 	 req.body.userId,
+				status : 	 '1',
+				auth   :  	 2
+			}
+		}).then( result => {
+			if(result.length === 0){
+				this.paramError("没有权限");
+			}
+
+			return articleModel.select({
+				where  		: 		{
+					_id 	: 		req.body.articleId
+				}
+			})
+		}).then( result => {
+			if(result.length === 0){
+				this.paramError("文章不存在");
+			}
+
+			article = result[0];
+			return articleModel.delete({
+				where 	: 	{
+					'_id' : req.body.articleId
+				}
+			})
+
+		}).then( result => {
+			article.image.forEach( item => {
+				if(fs.existsSync('files/userId-' + article.userId + '/' + item)){
+					fs.unlinkSync('files/userId-' + article.userId + '/' + item);
+				}
+			})
+			return{
+				data : result,
+				str  : "删除文章"
+			}
+		})
+	}
+
+	//用户删除文章
+	deleteArticle( req ){
+		this.validEmpty(["userId", "articleId"], req.body);
+		let article;
+		return userModel.select({
+			where 	   : 		{
+				_id    : 	 req.body.userId,
+				status : 	 '1'
+			}
+		}).then( result => {
+			if(result.length === 0){
+				this.paramError("你已经被管理员冻结账户");
+			}
+
+			return articleModel.select({
+				where  		: 		{
+					_id 	: 		req.body.articleId,
+					userId 	: 		req.body.userId
+				}
+			})
+		}).then( result => {
+			if(result.length === 0){
+				this.paramError("文章不存在");
+			}
+
+			article = result[0];
+			return articleModel.delete({
+				where 	: 	{
+					'_id' : req.body.articleId
+				}
+			})
+
+		}).then( result => {
+			article.image.forEach( item => {
+				if(fs.existsSync('files/userId-' + article.userId + '/' + item)){
+					fs.unlinkSync('files/userId-' + article.userId + '/' + item);
+				}
+			})
+			return{
+				data : result,
+				str  : "用户删除文章"
 			}
 		})
 	}

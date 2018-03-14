@@ -13,5 +13,13 @@ router.post('/getHotArticleList', (...args) => article.safeMode( 'getHotArticleL
 
 router.post('/getArticleListByPageAndId', (...args) => article.safeMode( 'getArticleListByPageAndId', ...args) );
 
+router.post('/getAllArticleList', (...args) => article.safeMode( 'getAllArticleList', ...args) );
+
+router.post('/changeArticleStatus', (...args) => article.safeMode( 'changeArticleStatus', ...args) );
+
+router.post('/forceDeleteArticle', (...args) => article.safeMode( 'forceDeleteArticle', ...args) );
+
+router.post('/deleteArticle', (...args) => article.safeMode( 'deleteArticle', ...args) );
+
 
 module.exports = router;
