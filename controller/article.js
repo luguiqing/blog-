@@ -353,4 +353,205 @@ module.exports = new class extends Controller{
 			}
 		})
 	}
+
+	//两种方式查看，游客和作者自己
+	getHomeArticleDetail( req ){
+		this.validEmpty(["articleId"], req.body);
+		let articleDetail, prev, next, author = false;
+
+		if(req.body.userId !== null && req.body.userId !== undefined){
+			//有登录
+			return articleModel.select({
+				where : {
+					_id    :  req.body.articleId,
+					userId :  req.body.userId
+				}
+			}).then( result => {
+				if(result.length === 0){
+					return false; //确认不是作者本人
+				}
+				return result;
+			}).then( result => {
+				author = result ? true : false; //确定是否为作者本人
+				if(author){
+					articleDetail = result[0];
+					return file.fetchHtml(articleDetail.content, articleDetail.userId)
+				}else{
+					return articleModel.select({
+						where : {
+							_id    :  req.body.articleId,
+							status :  1
+						}
+					}).then( result => {
+						if(result.length === 0){
+							this.paramError("没有权限查看或者文章不存在")
+						}
+						articleDetail = result[0];
+						return file.fetchHtml(articleDetail.content, articleDetail.userId)
+					})
+				}
+
+			}).then( result => {
+				articleDetail.content = result;
+				let where = {
+					_id      :  {
+						'$lt'  : 	articleDetail._id
+					}
+				}
+				if(author){
+					where.userId = articleDetail.userId;
+				}
+				//查找上一条数据
+				return articleModel.select({
+					where,
+					order : {
+						_id : -1
+					},
+					field : [0, 'content'],
+					limit : {
+						min : 0,
+						num : 1
+					}
+				})
+			}).then( result => {
+				if(result.length > 0){
+					delete result[0]['content'];
+					articleDetail.next = result[0]
+				}
+				let where = {
+					_id      :  {
+						'$gt'  : 	articleDetail._id
+					}
+				}
+				if(author){
+					where.userId = articleDetail.userId;
+				}
+				//查找下一条数据
+				return articleModel.select({
+					where,
+					order : {
+						_id : 1
+					},
+					field : [0, 'content'],
+					limit : {
+						min : 0,
+						num : 1
+					}
+				})
+			}).then( result => {
+				if(result.length > 0){
+					delete result[0]['content'];
+					articleDetail.prve = result[0]
+				}
+				return{
+					data :   articleDetail,
+					str  :   "加载文章成功"
+				}
+			})
+		}else{
+			//没有登录
+			return articleModel.select({
+				where : {
+					_id    :  req.body.articleId,
+					status :  1
+				}
+			}).then( result => {
+				if(result.length === 0){
+					this.paramError("没有权限查看或者文章不存在")
+				}
+				articleDetail = result[0];
+				return file.fetchHtml(articleDetail.content, articleDetail.userId)
+			}).then( result => {
+				articleDetail.content = result
+				//查找上一条数据
+				return articleModel.select({
+					where : {
+						_id      :  {
+							'$lt'  : 	articleDetail._id
+						}
+					},
+					order : {
+						_id : -1
+					},
+					field : [0, 'content'],
+					limit : {
+						min : 0,
+						num : 1
+					}
+				})
+			}).then( result => {
+				if(result.length > 0){
+					delete result[0]['content'];
+					articleDetail.next = result[0]
+				}
+
+				//查找下一条数据
+				return articleModel.select({
+					where : {
+						_id      :  {
+							'$gt'  : 	articleDetail._id
+						}
+					},
+					order : {
+						_id : 1
+					},
+					field : [0, 'content'],
+					limit : {
+						min : 0,
+						num : 1
+					}
+				})
+			}).then( result => {
+				if(result.length > 0){
+					delete result[0]['content'];
+					articleDetail.prev = result[0]//因时间倒叙
+				}
+				return{
+					data :   articleDetail,
+					str  :   "加载文章成功"
+				}
+			})
+		}
+
+		return articleModel.select({
+			where : {
+				_id    :  req.body.articleId,
+				status :  1
+			}
+		}).then( result => {
+			if(result.length === 0){
+				this.validEmpty(["userId"], req.body);
+				return articleModel.select({
+					where : {
+						_id    :  req.body.articleId,
+						userId :  req.body.userId
+					}
+				}).then( result => {
+					if(result.length === 0){
+						this.paramError("没有权限查或者文章不存在")
+					}
+					articleDetail = result[0];
+					return file.fetchHtml(articleDetail.content, articleDetail.userId)
+				});
+			}else{
+				articleDetail = result[0];
+				return file.fetchHtml(articleDetail.content, articleDetail.userId)
+			}
+		}).then( result => {
+			articleDetail.content = result
+			//查找上一条数据
+			return articleModel.select({
+				where : {
+					_id    :  req.body.articleId,
+					userId :  req.body.userId
+				}
+			})
+		}).then( result => {
+			articleDetail.content = result
+			return{
+				data :   articleDetail,
+				str  :   "加载文章成功"
+			}
+		})
+	}
 }

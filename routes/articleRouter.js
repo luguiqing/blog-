@@ -21,5 +21,7 @@ router.post('/forceDeleteArticle', (...args) => article.safeMode( 'forceDeleteAr
 
 router.post('/deleteArticle', (...args) => article.safeMode( 'deleteArticle', ...args) );
 
+router.post('/getHomeArticleDetail', (...args) => article.safeMode( 'getHomeArticleDetail', ...args) );
+
 
 module.exports = router;

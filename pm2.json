@@ -1,0 +1,14 @@
+{
+    "apps": [{
+		"name": "gqBlogServer",
+		"script": "app.js",
+		"cwd": "/usr/local/node/newBlog/blog-",
+		"max_memory_restart": "1G",
+		"autorestart": true,
+		"node_args": [],
+		"args": [],
+        "env": {
+
+        }
+   }]
+}
