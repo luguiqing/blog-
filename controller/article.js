@@ -441,7 +441,7 @@ module.exports = new class extends Controller{
 			}).then( result => {
 				if(result.length > 0){
 					delete result[0]['content'];
-					articleDetail.prve = result[0]
+					articleDetail.prev = result[0]
 				}
 				return{
 					data :   articleDetail,
